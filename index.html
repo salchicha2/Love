@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>For Jainayah</title>
+<style>
+  :root{
+    --bg:#070606;         /* page background */
+    --pink:#ff6b9a;       /* accent */
+    --text:#ffffff;       /* foreground text */
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    overflow:hidden;
+  }
+
+  /* tiled heart pattern (subtle) */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><g fill='%23ff6b9a' fill-opacity='0.06'><path d='M30 15c-7.2-9.6-30  -2.6-30 12 0 18 30 36 30 36s30-18 30-36c0-14.6-22.8-21.6-30-12z'/></g></svg>");
+    background-repeat:repeat;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  /* repeating wallpaper text (tiled SVG) */
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='120'><text x='0' y='56' font-family='Helvetica,Arial,sans-serif' font-size='42' fill='rgba(255,255,255,0.06)'>I love you baby — I love you baby — </text></svg>");
+    background-repeat:repeat;
+    mix-blend-mode:screen;
+    pointer-events:none;
+  }
+
+  /* center container */
+  .wrap{
+    position:relative;
+    z-index:2;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    cursor:pointer; /* clicking anywhere toggles/cycles */
+    -webkit-user-select:none;
+    user-select:none;
+  }
+
+  /* main line styling */
+  .line{
+    font-size: clamp(28px, 6vw, 64px);
+    color:var(--text);
+    text-transform:none;
+    letter-spacing:0.4px;
+    text-shadow:
+      0 2px 12px rgba(0,0,0,0.6),
+      0 0 30px rgba(255,107,154,0.15);
+    transition: transform .22s ease, opacity .22s ease;
+    opacity:1;
+    padding: 12px 22px;
+    border-radius:12px;
+    backdrop-filter: blur(4px) saturate(110%);
+  }
+
+  /* clickable hint lower */
+  .hint{
+    position:fixed;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:14px;
+    color:rgba(255,255,255,0.6);
+    z-index:3;
+    pointer-events:none;
+  }
+
+  /* small pulse when clicked */
+  .pulse{
+    transform: scale(0.98);
+    opacity:0.9;
+  }
+
+  /* small credit center top (optional) */
+  .credit{
+    position:fixed;
+    top:18px;
+    left:50%;
+    transform:translateX(-50%);
+    color:rgba(255,255,255,0.12);
+    font-size:12px;
+    z-index:1;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+  <div class="credit">For Jainayah ❤️</div>
+
+  <div class="wrap" id="wrap">
+    <div class="line" id="line">I love you Jainayah</div>
+  </div>
+
+  <div class="hint">click anywhere to change the message & play</div>
+
+  <!-- AUDIO: put your file here. Replace song.mp3 with the correct filename or path -->
+  <audio id="song" preload="auto">
+    <source src="song.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+<script>
+  (function(){
+    const lines = [
+      "I love you Jainayah",
+      "I love you baby",
+      "I'll always love you",
+      "It's always gonna be you",
+      "Nobody but you"
+    ];
+
+    const lineEl = document.getElementById('line');
+    const wrap = document.getElementById('wrap');
+    const audio = document.getElementById('song');
+
+    let idx = 0;
+    let played = false; // whether audio has been started already
+
+    // Ensure the centered text starts with your desired first line:
+    lineEl.textContent = lines[0];
+
+    // Handle clicks anywhere
+    wrap.addEventListener('click', function(e){
+      // cycle to next index
+      idx = (idx + 1) % lines.length;
+      // small visual pulse
+      lineEl.classList.add('pulse');
+      setTimeout(()=> lineEl.classList.remove('pulse'), 160);
+
+      // change text
+      // subtle fade using opacity/transform
+      lineEl.style.opacity = 0;
+      lineEl.style.transform = "translateY(6px) scale(0.995)";
+      setTimeout(()=>{
+        lineEl.textContent = lines[idx];
+        lineEl.style.opacity = 1;
+        lineEl.style.transform = "translateY(0) scale(1)";
+      }, 120);
+
+      // Play audio the first time only (do NOT restart on later clicks)
+      if (!played) {
+        // attempt to play, browsers require user gesture (click) — good
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err)=> {
+            // If play fails (autoplay policy / format issue), just ignore — user can press play via controls if added
+            console.warn('audio play failed:', err);
+          });
+        }
+        played = true;
+      }
+    });
+
+    // Optional: if you want the first click to both show second line and play, current logic does that.
+    // If you want the first click to keep showing the same first line then start playing, adjust above.
+
+    // Prevent clicks on text selection mobile weirdness
+    wrap.addEventListener('touchstart', ()=>{ /* noop to ensure user gesture */ }, {passive:true});
+  })();
+</script>
+</body>
+</html>
